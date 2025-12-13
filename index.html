@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freelance Invoice Generator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at top,#0f0f0f,#020617);
+  min-height:100vh;
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  color:#e5e7eb;
+}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;
+  padding:30px;
+  width:100%;
+  max-width:420px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:13px;
+  color:#94a3b8;
+  margin-bottom:25px;
+}
+
+label{
+  display:block;
+  margin-top:14px;
+  font-size:13px;
+  color:#94a3b8;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:12px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:#fff;
+  font-size:14px;
+}
+
+input:focus,select:focus{
+  outline:none;
+  border-color:#ef4444;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.date{
+  margin-top:12px;
+  text-align:right;
+  font-size:12px;
+  color:#94a3b8;
+}
+
+.project{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.project input{
+  flex:1;
+}
+
+.btn-outline{
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  background:none;
+  border:1px dashed #ef4444;
+  border-radius:14px;
+  color:#ef4444;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.total{
+  margin-top:18px;
+  display:flex;
+  justify-content:space-between;
+  font-size:18px;
+  font-weight:700;
+}
+
+.btn-primary{
+  margin-top:22px;
+  width:100%;
+  padding:14px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  border:none;
+  border-radius:16px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* ===== PDF LAYOUT ===== */
+#invoice{
+  width:800px;
+  background:#fff;
+  color:#000;
+  padding:40px;
+  position:absolute;
+  left:-9999px;
+}
+
+#invoice h1{
+  margin-top:0;
+}
+
+.pdf-row{
+  display:flex;
+  justify-content:space-between;
+}
+
+.label{
+  font-size:12px;
+  color:#555;
+}
+
+.value{
+  font-weight:600;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+}
+
+th{
+  background:#f3f3f3;
+}
+
+.footer-line{
+  margin-top:40px;
+  border-top:2px solid #000;
+}
+
+.footer{
+  margin-top:10px;
+  font-size:13px;
+}
+
+.footer strong{
+  display:block;
+  margin-bottom:4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Invoice Generator</h2>
+  <div class="subtitle">Professional freelance invoice</div>
+
+  <label>Nama Client</label>
+  <input id="client">
+
+  <label>Nama Freelancer</label>
+  <input id="freelancer">
+
+  <div class="row">
+    <div>
+      <label>No. Rekening</label>
+      <input id="rekening">
+    </div>
+    <div>
+      <label>Nama Bank</label>
+      <input id="bank">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Zona Waktu</label>
+      <select id="tz">
+        <option value="7">WIB</option>
+        <option value="8">WITA</option>
+        <option value="9">WIT</option>
+      </select>
+    </div>
+    <div class="date" id="date"></div>
+  </div>
+
+  <label>Project</label>
+  <div id="projects"></div>
+  <button class="btn-outline" onclick="addProject()">+ Tambah Project</button>
+
+  <div class="total">
+    <span>Total</span>
+    <span id="total">Rp 0</span>
+  </div>
+
+  <button class="btn-primary" onclick="downloadPDF()">Download Invoice PDF</button>
+</div>
+
+<!-- PDF -->
+<div id="invoice">
+  <h1>INVOICE</h1>
+  <hr>
+
+  <div class="pdf-row">
+    <div>
+      <div class="label">KEPADA:</div>
+      <div class="value" id="pdfClient"></div>
+    </div>
+    <div>
+      <div class="label">Tanggal</div>
+      <div class="value" id="pdfDate"></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Keterangan</th>
+        <th>Harga</th>
+        <th>Qty</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="pdfProjects"></tbody>
+  </table>
+
+  <div class="total">
+    <strong>TOTAL</strong>
+    <strong id="pdfTotal"></strong>
+  </div>
+
+  <hr class="footer-line">
+
+  <div class="footer">
+    <strong id="pdfFreelancer"></strong>
+    <div>No. Rekening: <span id="pdfRekening"></span></div>
+    <div>Nama Bank: <span id="pdfBank"></span></div>
+  </div>
+</div>
+
+<script>
+function addProject(){
+  const div=document.createElement("div");
+  div.className="project";
+  div.innerHTML=`
+    <input placeholder="Nama project">
+    <input type="number" placeholder="Harga">
+  `;
+  div.querySelectorAll("input").forEach(i=>i.oninput=updateTotal);
+  document.getElementById("projects").appendChild(div);
+}
+addProject();
+
+function updateTotal(){
+  let t=0;
+  document.querySelectorAll(".project input[type=number]").forEach(i=>{
+    t+=Number(i.value)||0;
+  });
+  document.getElementById("total").innerText="Rp "+t.toLocaleString("id-ID");
+  return t;
+}
+
+function updateDate(){
+  const tz=Number(document.getElementById("tz").value);
+  const now=new Date();
+  const utc=now.getTime()+now.getTimezoneOffset()*60000;
+  const local=new Date(utc+tz*3600000);
+  document.getElementById("date").innerText=local.toLocaleString("id-ID");
+}
+setInterval(updateDate,1000);updateDate();
+
+async function downloadPDF(){
+  pdfClient.innerText=client.value;
+  pdfFreelancer.innerText=freelancer.value;
+  pdfRekening.innerText=rekening.value;
+  pdfBank.innerText=bank.value;
+  pdfDate.innerText=date.innerText;
+
+  pdfProjects.innerHTML="";
+  let total=0;
+
+  document.querySelectorAll(".project").forEach(p=>{
+    const name=p.children[0].value;
+    const price=Number(p.children[1].value)||0;
+    total+=price;
+    pdfProjects.innerHTML+=`
+      <tr>
+        <td>${name}</td>
+        <td>Rp ${price.toLocaleString("id-ID")}</td>
+        <td>1</td>
+        <td>Rp ${price.toLocaleString("id-ID")}</td>
+      </tr>`;
+  });
+
+  pdfTotal.innerText="Rp "+total.toLocaleString("id-ID");
+
+  const canvas=await html2canvas(invoice,{scale:2});
+  const img=canvas.toDataURL("image/png");
+
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF("p","mm","a4");
+  const w=210;
+  const h=canvas.height*w/canvas.width;
+  pdf.addImage(img,"PNG",0,0,w,h);
+  pdf.save("invoice.pdf");
+}
+</script>
+
+</body>
+</html>
