@@ -21,7 +21,6 @@ body{
   padding:20px;
   color:#e5e7eb;
 }
-
 .card{
   background:rgba(255,255,255,0.05);
   backdrop-filter:blur(18px);
@@ -29,29 +28,9 @@ body{
   border-radius:20px;
   padding:40px;
   width:100%;
-  max-width:420px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+  max-width:460px;
 }
-
-h2{
-  text-align:center;
-  margin-bottom:8px;
-}
-
-.subtitle{
-  text-align:center;
-  font-size:13px;
-  color:#94a3b8;
-  margin-bottom:25px;
-}
-
-label{
-  display:block;
-  margin-top:14px;
-  font-size:13px;
-  color:#94a3b8;
-}
-
+label{display:block;margin-top:14px;font-size:13px;color:#94a3b8}
 input,select{
   width:100%;
   padding:12px;
@@ -60,34 +39,44 @@ input,select{
   border:1px solid #1e293b;
   background:#020617;
   color:#fff;
-  font-size:14px;
 }
+.row{display:flex;gap:40px;align-items:flex-end}
+.date{font-size:12px;color:#94a3b8;white-space:nowrap;padding-bottom:10px}
+.project{display:flex;gap:8px;margin-top:10px}
+.project input{flex:1}
+.qty{max-width:70px}
 
-input:focus,select:focus{
-  outline:none;
-  border-color:#ef4444;
-}
-
-.row{
+/* checkbox */
+.dp-check{
   display:flex;
-  gap:30px;
+  align-items:center;
+  gap:12px;
+  margin-top:18px;
+  cursor:pointer;
 }
-
-.date{
-  margin-top:12px;
-  text-align:right;
-  font-size:12px;
-  color:#94a3b8;
+.dp-check input{
+  appearance:none;
+  width:18px;
+  height:18px;
+  border-radius:5px;
+  border:2px solid #475569;
+  background:#020617;
+  position:relative;
 }
-
-.project{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
+.dp-check input:checked{
+  background:#22c55e;
+  border-color:#22c55e;
 }
-
-.project input{
-  flex:1;
+.dp-check input:checked::after{
+  content:"";
+  position:absolute;
+  width:4px;
+  height:8px;
+  border:solid #022c22;
+  border-width:0 2px 2px 0;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-55%) rotate(45deg);
 }
 
 .btn-outline{
@@ -99,17 +88,11 @@ input:focus,select:focus{
   border-radius:14px;
   color:#ef4444;
   font-weight:600;
-  cursor:pointer;
 }
-
-.total{
-  margin-top:18px;
-  display:flex;
-  justify-content:space-between;
-  font-size:18px;
-  font-weight:700;
-}
-
+.summary{margin-top:18px;font-size:14px}
+.summary div{display:flex;justify-content:space-between;margin-top:8px}
+.green{color:#22c55e;font-weight:600}
+.total-final{font-size:18px;font-weight:700;margin-top:12px}
 .btn-primary{
   margin-top:22px;
   width:100%;
@@ -119,65 +102,31 @@ input:focus,select:focus{
   border-radius:16px;
   color:#fff;
   font-weight:700;
-  cursor:pointer;
 }
 
-/* ===== PDF LAYOUT ===== */
+/* ===== PDF ===== */
 #invoice{
   width:800px;
-  background:#fff;
+  background:#ffffff;
   color:#000;
   padding:40px;
   position:absolute;
   left:-9999px;
 }
-
-#invoice h1{
-  margin-top:0;
+.pdf-row{display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border-bottom:1px solid #ddd;padding:8px}
+th{background:#f3f3f3}
+.pdf-summary{
+  margin-top:20px;
+  display:flex;
+  justify-content:flex-end;
 }
-
-.pdf-row{
+.pdf-summary > div{width:320px}
+.pdf-summary div div{
   display:flex;
   justify-content:space-between;
-}
-
-.label{
-  font-size:12px;
-  color:#555;
-}
-
-.value{
-  font-weight:600;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-
-th,td{
-  border-bottom:1px solid #ddd;
-  padding:8px;
-}
-
-th{
-  background:#f3f3f3;
-}
-
-.footer-line{
-  margin-top:40px;
-  border-top:2px solid #000;
-}
-
-.footer{
-  margin-top:10px;
-  font-size:13px;
-}
-
-.footer strong{
-  display:block;
-  margin-bottom:4px;
+  margin-top:6px;
 }
 </style>
 </head>
@@ -185,7 +134,7 @@ th{
 <body>
 
 <div class="card">
-  <h2>Invoice Generator</h2>
+  <h2 style="text-align:center">Invoice Generator</h2>
 
   <label>Nama Client</label>
   <input id="client">
@@ -194,18 +143,12 @@ th{
   <input id="freelancer">
 
   <div class="row">
-    <div>
-      <label>No. Rekening</label>
-      <input id="rekening">
-    </div>
-    <div>
-      <label>Nama Bank</label>
-      <input id="bank">
-    </div>
+    <div><label>No. Rekening</label><input id="rekening"></div>
+    <div><label>Nama Bank</label><input id="bank"></div>
   </div>
 
   <div class="row">
-    <div>
+    <div style="flex:1">
       <label>Zona Waktu</label>
       <select id="tz">
         <option value="7">WIB</option>
@@ -220,34 +163,57 @@ th{
   <div id="projects"></div>
   <button class="btn-outline" onclick="addProject()">+ Tambah Project</button>
 
-  <div class="total">
-    <span>Total</span>
-    <span id="total">Rp 0</span>
+  <label class="dp-check">
+    <input type="checkbox" id="useDP">
+    <span>Checklist jika sudah DP</span>
+  </label>
+
+  <div id="dpOptions" style="display:none">
+    <label>Pilih DP</label>
+    <select id="dpType">
+      <option value="10">10%</option>
+      <option value="30">30%</option>
+      <option value="50">50%</option>
+      <option value="custom">Custom</option>
+    </select>
+    <input id="customDP" type="number" placeholder="Masukkan angka (%)" style="display:none">
+  </div>
+
+  <div class="summary">
+    <div><span>Subtotal</span><span id="subtotal">Rp 0</span></div>
+    <div id="dpRow" style="display:none">
+      <span>Down Payment</span>
+      <span class="green" id="dpValue">Rp 0</span>
+    </div>
+    <div class="total-final">
+      <span>Total Setelah DP</span>
+      <span id="finalTotal">Rp 0</span>
+    </div>
   </div>
 
   <button class="btn-primary" onclick="downloadPDF()">Download Invoice PDF</button>
 </div>
 
-<!-- PDF -->
+<!-- ========= PDF TEMPLATE (FIXED & COMPLETE) ========= -->
 <div id="invoice">
   <h1>INVOICE</h1>
   <hr>
 
   <div class="pdf-row">
     <div>
-      <div class="label">KEPADA:</div>
-      <div class="value" id="pdfClient"></div>
+      <strong>Kepada:</strong><br>
+      <span id="pdfClient"></span>
     </div>
     <div>
-      <div class="label">Tanggal</div>
-      <div class="value" id="pdfDate"></div>
+      <strong>Tanggal:</strong><br>
+      <span id="pdfDate"></span>
     </div>
   </div>
 
   <table>
     <thead>
       <tr>
-        <th>Keterangan</th>
+        <th>Project</th>
         <th>Harga</th>
         <th>Qty</th>
         <th>Total</th>
@@ -256,52 +222,90 @@ th{
     <tbody id="pdfProjects"></tbody>
   </table>
 
-  <div class="total">
-    <strong>TOTAL</strong>
-    <strong id="pdfTotal"></strong>
+  <div class="pdf-summary">
+    <div>
+      <div><span>Subtotal</span><strong id="pdfSubtotal"></strong></div>
+      <div id="pdfDPRow">
+        <span>Down Payment</span>
+        <strong style="color:rgb(0, 0, 0)" id="pdfDP"></strong>
+      </div>
+      <div style="font-size:16px;font-weight:700;margin-top:8px">
+        <span>Total Setelah DP</span>
+        <strong id="pdfFinal"></strong>
+      </div>
+    </div>
   </div>
 
-  <hr class="footer-line">
-
-  <div class="footer">
-    <strong id="pdfFreelancer"></strong>
-    <div>No. Rekening: <span id="pdfRekening"></span></div>
-    <div>Nama Bank: <span id="pdfBank"></span></div>
-  </div>
+  <hr>
+  <strong id="pdfFreelancer"></strong><br>
+  No. Rekening: <span id="pdfRekening"></span><br>
+  Bank: <span id="pdfBank"></span>
 </div>
 
 <script>
+const projects=document.getElementById("projects");
+const useDP=document.getElementById("useDP");
+const dpOptions=document.getElementById("dpOptions");
+const dpType=document.getElementById("dpType");
+const customDP=document.getElementById("customDP");
+
 function addProject(){
-  const div=document.createElement("div");
-  div.className="project";
-  div.innerHTML=`
-    <input placeholder="Nama project">
+  const d=document.createElement("div");
+  d.className="project";
+  d.innerHTML=`
+    <input placeholder="Nama Project">
+    <input type="number" class="qty" value="1">
     <input type="number" placeholder="Harga">
   `;
-  div.querySelectorAll("input").forEach(i=>i.oninput=updateTotal);
-  document.getElementById("projects").appendChild(div);
+  d.querySelectorAll("input").forEach(i=>i.addEventListener("input",updateTotal));
+  projects.appendChild(d);
 }
 addProject();
 
+useDP.addEventListener("change",updateTotal);
+dpType.addEventListener("change",updateTotal);
+customDP.addEventListener("input",updateTotal);
+
 function updateTotal(){
-  let t=0;
-  document.querySelectorAll(".project input[type=number]").forEach(i=>{
-    t+=Number(i.value)||0;
+  let subtotal=0;
+  document.querySelectorAll(".project").forEach(p=>{
+    subtotal+=(+p.children[1].value||0)*(+p.children[2].value||0);
   });
-  document.getElementById("total").innerText="Rp "+t.toLocaleString("id-ID");
-  return t;
+
+  let dp=0;
+  if(useDP.checked){
+    dpOptions.style.display="block";
+    dpRow.style.display="flex";
+    customDP.style.display=dpType.value==="custom"?"block":"none";
+    const percent=dpType.value==="custom"?+customDP.value||0:+dpType.value;
+    dp=subtotal*percent/100;
+  }else{
+    dpOptions.style.display="none";
+    dpRow.style.display="none";
+    customDP.style.display="none";
+  }
+
+  subtotalEl=subtotal;
+  document.getElementById("subtotal").innerText="Rp "+subtotal.toLocaleString("id-ID");
+  document.getElementById("dpValue").innerText="Rp "+dp.toLocaleString("id-ID");
+  document.getElementById("finalTotal").innerText="Rp "+(subtotal-dp).toLocaleString("id-ID");
+
+  return {subtotal,dp,final:subtotal-dp};
 }
 
 function updateDate(){
-  const tz=Number(document.getElementById("tz").value);
+  const tz=document.getElementById("tz").value;
   const now=new Date();
   const utc=now.getTime()+now.getTimezoneOffset()*60000;
   const local=new Date(utc+tz*3600000);
   document.getElementById("date").innerText=local.toLocaleString("id-ID");
 }
-setInterval(updateDate,1000);updateDate();
+setInterval(updateDate,1000);
+updateDate();
 
 async function downloadPDF(){
+  const calc=updateTotal();
+
   pdfClient.innerText=client.value;
   pdfFreelancer.innerText=freelancer.value;
   pdfRekening.innerText=rekening.value;
@@ -309,31 +313,30 @@ async function downloadPDF(){
   pdfDate.innerText=date.innerText;
 
   pdfProjects.innerHTML="";
-  let total=0;
-
   document.querySelectorAll(".project").forEach(p=>{
-    const name=p.children[0].value;
-    const price=Number(p.children[1].value)||0;
-    total+=price;
+    const qty=+p.children[1].value||0;
+    const price=+p.children[2].value||0;
+    const total=qty*price;
     pdfProjects.innerHTML+=`
       <tr>
-        <td>${name}</td>
+        <td>${p.children[0].value}</td>
         <td>Rp ${price.toLocaleString("id-ID")}</td>
-        <td>1</td>
-        <td>Rp ${price.toLocaleString("id-ID")}</td>
+        <td>${qty}</td>
+        <td>Rp ${total.toLocaleString("id-ID")}</td>
       </tr>`;
   });
 
-  pdfTotal.innerText="Rp "+total.toLocaleString("id-ID");
+  pdfSubtotal.innerText="Rp "+calc.subtotal.toLocaleString("id-ID");
+  pdfDP.innerText="Rp "+calc.dp.toLocaleString("id-ID");
+  pdfDPRow.style.display=useDP.checked?"flex":"none";
+  pdfFinal.innerText="Rp "+calc.final.toLocaleString("id-ID");
 
   const canvas=await html2canvas(invoice,{scale:2});
-  const img=canvas.toDataURL("image/png");
-
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF("p","mm","a4");
   const w=210;
   const h=canvas.height*w/canvas.width;
-  pdf.addImage(img,"PNG",0,0,w,h);
+  pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,w,h);
   pdf.save("invoice.pdf");
 }
 </script>
